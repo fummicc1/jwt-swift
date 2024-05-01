@@ -13,13 +13,11 @@ public protocol JwtCodable {
 	var header: JwtHeader { get }
 	var payload: Payload { get }
 
-	var secret: String { get }
+	func sign(secret: String) throws -> String
+	func compare(with other: some JwtCodable, secret: String) throws -> Bool
+	func parse() throws -> [String: Any]
 
-	func sign() throws -> String
-	func compare(with other: some JwtCodable) throws -> Bool
-	func parse(payload: Payload) throws -> [String: Any]
-
-	static func decode(from: String) throws -> Self
+	static func decode(from: String, secret: String) throws -> Self
 }
 
 public enum JwtCodableError: LocalizedError {

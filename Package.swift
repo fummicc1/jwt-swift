@@ -5,19 +5,34 @@ import PackageDescription
 
 let package = Package(
     name: "jwt-swift",
+	platforms: [
+		.iOS(.v13),
+		.macOS(.v10_15)
+	],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "jwt-swift",
-            targets: ["jwt-swift"]),
+            name: "JwtSwift",
+            targets: ["JwtSwift"]),
     ],
+	dependencies: [
+		.package(
+			url: "https://github.com/apple/swift-collections",
+			.upToNextMajor(from: "1.1.0")
+		),
+	],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "jwt-swift"),
+			name: "JwtSwift",
+			dependencies: [
+				.product(name: "Collections", package: "swift-collections")
+			]
+		),
         .testTarget(
-            name: "jwt-swiftTests",
-            dependencies: ["jwt-swift"]),
+            name: "JwtSwiftTests",
+            dependencies: ["JwtSwift"]
+		),
     ]
 )

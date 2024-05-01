@@ -6,25 +6,30 @@
 //
 
 import Foundation
+import Collections
 
 extension JwtCodable {
-	public func sign() throws -> String {
+	public func sign(secret: String) throws -> String {
 		var ret: String = ""
 		let alg = header.alg.rawValue
 		let typ = header.typ.rawValue
-		let json = [
+		let headerDict: OrderedDictionary = [
 			"alg": alg,
 			"typ": typ
 		]
-		let headerData = try JSONSerialization.data(withJSONObject: json)
-		let headerBase64 = headerData.base64EncodedString()
+		let json = "{" + headerDict.map { "\($0.key):\($0.value)" }.joined(separator: ",") + "}"
 
-		let parsedPayload = try parse(payload: payload)
-		let payloadData = try JSONSerialization.data(withJSONObject: parsedPayload)
+		let headerBase64 = json.data(using: .utf8)!.base64EncodedString()
+
+		let parsedPayload = try parse()
+		let payloadData = try JSONSerialization.data(
+			withJSONObject: parsedPayload
+		)
 		let payloadBase64 = payloadData.base64EncodedString()
 
 		// TODO: Implement
-		let signBase64 = ""
+		ret = "\(headerBase64).\(payloadBase64)"
+		let signBase64 = try makeSignature(with: secret, from: ret)
 
 		ret = "\(headerBase64).\(payloadBase64).\(signBase64)"
 
@@ -38,12 +43,13 @@ extension JwtCodable {
 		guard let json else {
 			throw JwtCodableError.failedToParse(payload: data)
 		}
+		print("parsed json", json)
 		return json
 	}
 
-	public func compare(with other: some JwtCodable) throws -> Bool {
-		let lhs = try sign()
-		let rhs = try other.sign()
+	public func compare(with other: some JwtCodable, secret: String) throws -> Bool {
+		let lhs = try sign(secret: secret)
+		let rhs = try other.sign(secret: secret)
 		return lhs == rhs
 	}
 }
