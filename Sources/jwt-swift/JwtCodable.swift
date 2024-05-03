@@ -13,8 +13,7 @@ public protocol JwtCodable {
 	var header: JwtHeader { get }
 	var payload: Payload { get }
 
-	func sign(secret: String) throws -> String
-	func compare(with other: some JwtCodable, secret: String) throws -> Bool
+	func encode(with secret: String) throws -> String
 	func parse() throws -> [String: Any]
 
 	static func decode(from: String, secret: String) throws -> Self

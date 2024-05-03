@@ -10,15 +10,15 @@ import CryptoKit
 
 extension JwtCodable {
 	package func makeSignature(with secret: String, from encoded: String) throws -> String {
-		let data = Data(encoded.utf8)
+		let data = encoded.data(using: .utf8)!
 		switch header.alg {
 		case .hs256:
-			let key = SymmetricKey(data: Data(secret.utf8))
+			let key = SymmetricKey(data: secret.data(using: .utf8)!)
 			let signature = HMAC<SHA256>.authenticationCode(
 				for: data,
 				using: key
 			)
-			let ret = Data(signature).map { String(format: "%02hhx", $0) }.joined()
+			let ret = Data(signature).base64EncodedString().replacingForBase64URLEncoding()
 			return ret
 		}
 	}

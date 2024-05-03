@@ -9,25 +9,27 @@ import Foundation
 import Collections
 
 extension JwtCodable {
-	public func sign(secret: String) throws -> String {
+	public func encode(with secret: String) throws -> String {
 		var ret: String = ""
 		let alg = header.alg.rawValue
 		let typ = header.typ.rawValue
-		let headerDict: OrderedDictionary = [
+		let headerDict = [
 			"alg": alg,
 			"typ": typ
 		]
-		let json = "{" + headerDict.map { "\($0.key):\($0.value)" }.joined(separator: ",") + "}"
 
-		let headerBase64 = json.data(using: .utf8)!.base64EncodedString()
+		let headerBase64 = try JSONSerialization.data(
+			withJSONObject: headerDict
+		)
+			.base64EncodedString()
+			.replacingForBase64URLEncoding()
 
 		let parsedPayload = try parse()
 		let payloadData = try JSONSerialization.data(
 			withJSONObject: parsedPayload
 		)
-		let payloadBase64 = payloadData.base64EncodedString()
+		let payloadBase64 = payloadData.base64EncodedString().replacingForBase64URLEncoding()
 
-		// TODO: Implement
 		ret = "\(headerBase64).\(payloadBase64)"
 		let signBase64 = try makeSignature(with: secret, from: ret)
 
@@ -39,17 +41,29 @@ extension JwtCodable {
 	public func parse() throws -> [String: Any] where Payload: Codable {
 		let encoder = JSONEncoder()
 		let data = try encoder.encode(payload)
-		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+		let json = try JSONSerialization.jsonObject(
+			with: data
+		) as? [String: Any]
 		guard let json else {
 			throw JwtCodableError.failedToParse(payload: data)
 		}
-		print("parsed json", json)
 		return json
 	}
+}
 
-	public func compare(with other: some JwtCodable, secret: String) throws -> Bool {
-		let lhs = try sign(secret: secret)
-		let rhs = try other.sign(secret: secret)
-		return lhs == rhs
+extension String {
+	func replacingForBase64URLEncoding() -> String {
+		replacingOccurrences(
+			of: "+",
+			with: "-"
+		)
+		.replacingOccurrences(
+			of: "/",
+			with: "_"
+		)
+		.replacingOccurrences(
+			of: "=",
+			with: ""
+		)
 	}
 }
