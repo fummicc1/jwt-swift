@@ -85,7 +85,7 @@ extension String {
 	}
 
 	func convertToBase64Encoding() -> String {
-		replacingOccurrences(
+		var ret = replacingOccurrences(
 			of: "-",
 			with: "+"
 		)
@@ -93,5 +93,9 @@ extension String {
 			of: "_",
 			with: "/"
 		)
+		while ret.count % 4 != 0 {
+			ret += "="
+		}
+		return ret
 	}
 }
