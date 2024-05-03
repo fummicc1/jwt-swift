@@ -44,7 +44,7 @@ extension Jwt {
 		}
 		let header = try JSONDecoder().decode(JwtHeader.self, from: headerData)
 		guard let payloadData = Data(
-			base64Encoded: parts[1].data(using: .utf8)!
+			base64Encoded: parts[1].convertToBase64Encoding()
 		) else {
 			throw JwtError.failedToDecodePayload(
 				base64: parts[1].convertToBase64Encoding()
