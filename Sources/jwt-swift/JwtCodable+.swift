@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Collections
 
 extension JwtCodable {
 	public func encode(with secret: String) throws -> String {
