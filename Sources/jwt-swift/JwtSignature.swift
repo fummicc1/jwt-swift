@@ -8,7 +8,7 @@
 import Foundation
 import CryptoKit
 
-extension JwtCodable {
+extension Jwt {
 	package func makeSignature(with secret: String, from encoded: String) throws -> String {
 		let data = encoded.data(using: .utf8)!
 		switch header.alg {
@@ -18,7 +18,7 @@ extension JwtCodable {
 				for: data,
 				using: key
 			)
-			let ret = Data(signature).base64EncodedString().replacingForBase64URLEncoding()
+			let ret = Data(signature).base64EncodedString().convertToBase64URLEncoding()
 			return ret
 		}
 	}
